@@ -1,0 +1,4 @@
+Import('*')
+
+SimObject('MatrixEngine.py', sim_objects=['MatrixEngine'])
+Source('matrix_engine.cc')

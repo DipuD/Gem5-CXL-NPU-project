@@ -9,6 +9,8 @@ from gem5.resources.resource import BinaryResource
 from gem5.simulate.simulator import Simulator
 from gem5.isas import ISA
 
+from m5.objects.MatrixEngine import MatrixEngine
+
 # 1. Setup the Cache Hierarchy
 cache_hierarchy = PrivateL1PrivateL2CacheHierarchy(
     l1d_size="32kB",
@@ -26,6 +28,9 @@ processor = SimpleProcessor(
     isa=ISA.X86
 )
 
+# 3.5 Setup our Custom Hardware
+npu = MatrixEngine()
+
 # 4. Setup the Board
 board = SimpleBoard(
     clk_freq="3GHz",
@@ -33,6 +38,11 @@ board = SimpleBoard(
     memory=memory,
     cache_hierarchy=cache_hierarchy
 )
+
+# Attach the NPU to the board so the simulator knows it exists
+board.npu = npu 
+
+board.npu.mem_side = cache_hierarchy.membus.cpu_side_ports
 
 # 5. Set the Workload (Our compiled C program)
 binary_path = "/home/dipu3d/gem5-cxl-npu-project/workloads/mmult"
