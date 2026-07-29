@@ -1,0 +1,19 @@
+**2. Create/Open `.gitignore` and paste this:**
+```text
+# Ignore compiled C/C++ binaries
+workloads/mmult
+workloads/*.o
+workloads/*.out
+
+# Ignore gem5 simulation output directories
+m5out/
+stats.txt
+config.ini
+config.json
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore VS Code settings (optional, but good practice)
+.vscode/
