@@ -13,11 +13,23 @@ The goal of this project is to explore the microarchitectural trade-offs between
   * Executed a statically compiled C-based Matrix Multiplication workload.
   * Successfully demonstrated the "Memory Wall" effect: by scaling the working set to 768KB, L1 cache misses surged to 11.8 Million, and IPC degraded severely from 2.22 down to 0.80, mathematically proving the need for a dedicated NPU.
 
+* **Milestone 2: The NPU SimObject**
+  * Developed the core C++ framework for the custom hardware accelerator (MatrixEngine).
+  * Created the Python-to-C++ SimObject interface and successfully compiled the component into the gem5 binary using scons.
+  * Instantiated the hardware block on the simulated motherboard alongside the CPU.
+
+
+* **Milestone 3: The Interconnect**
+  * Engineered a custom RequestPort (Memory Side Port) inside the MatrixEngine C++ class.
+  * Physically wired the NPU's memory port to the main system coherent crossbar (memory bus) via Python configuration scripts.
+  * Booted the fully integrated system, establishing the foundation for Direct Memory Access (DMA) over a simulated CXL link. 
+
 ## Directory Structure
 
 * `configs/` - Python topology scripts for gem5 (`baseline.py`).
 * `src/` - C++ SimObject definitions for the custom NPU (In Progress).
 * `workloads/` - C-based matrix multiplication algorithms.
+
 
 ## How to Run the Baseline
 
