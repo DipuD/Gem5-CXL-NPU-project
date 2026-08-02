@@ -29,7 +29,7 @@ processor = SimpleProcessor(
 )
 
 # 3.5 Setup our Custom Hardware
-npu = MatrixEngine()
+npu = MatrixEngine(pio_addr=0x80000000)
 
 # 4. Setup the Board
 board = SimpleBoard(
@@ -42,6 +42,7 @@ board = SimpleBoard(
 # Attach the NPU and connect the PIO (MMIO) port to the coherent crossbar
 board.npu = npu
 board.npu.pio = cache_hierarchy.membus.mem_side_ports
+board.npu.dma = cache_hierarchy.membus.cpu_side_ports 
 
 # 5. Setup the Workload (Using the proper gem5 stdlib method!)
 binary = BinaryResource("/home/dipu3d/gem5-cxl-npu-project/workloads/mmult")

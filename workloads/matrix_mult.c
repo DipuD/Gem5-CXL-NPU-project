@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #define SIZE 256 // Scaled up to blow out the 256KB L2 Cache!
 
@@ -21,24 +22,32 @@ void multiply() {
 }
 
 int main() {
+    // Set up our MMIO register pointers based on offsets
+    volatile uint32_t *npu_cmd    = (uint32_t *)0x80000000;
+    volatile uint32_t *npu_addr_a = (uint32_t *)0x80000004;
+    volatile uint32_t *npu_addr_b = (uint32_t *)0x80000008;
+    volatile uint32_t *npu_addr_c = (uint32_t *)0x8000000C;
+    volatile uint32_t *npu_size_n = (uint32_t *)0x80000010;
 
-    // Pointer to our NPU's MMIO register
-    volatile int *npu_cmd_reg = (int *)0x80000000;
-
-    printf("Waking up the NPU via MMIO...\n");
-    *npu_cmd_reg = 0x01; // Send a "1" to the NPU over the bus!
+    printf("CPU: Programming NPU Registers...\n");
     
-    // Initialize with dummy data
-    for (int i=0; i<SIZE; i++) {
-        for (int j=0; j<SIZE; j++) {
-            A[i][j] = i + j;
-            B[i][j] = i - j;
-        }
+    // Write pointers (cast to 32-bit integers for the bus)
+    // Using your actual array names: A, B, and C
+    *npu_addr_a = (uint32_t)(uintptr_t)A;
+    *npu_addr_b = (uint32_t)(uintptr_t)B;
+    *npu_addr_c = (uint32_t)(uintptr_t)C;
+    *npu_size_n = SIZE; // Using your SIZE macro
+
+    printf("CPU: Starting NPU Hardware...\n");
+    *npu_cmd = 0x01; // Send START command
+
+    // CPU Busy-Wait Loop: Wait for the NPU to clear the command register to 0
+    printf("CPU: Waiting for NPU to finish...\n");
+    while (*npu_cmd != 0x00) {
+        // In a real system, the CPU would sleep or do context switching here.
+        // For this baseline, we will just spin.
     }
 
-    printf("Starting CPU Matrix Multiplication...\n");
-    multiply();
-    printf("Finished Matrix Multiplication!\n");
-
+    printf("CPU: NPU finished successfully!\n");
     return 0;
 }

@@ -28,6 +28,11 @@ The goal of this project is to explore the microarchitectural trade-offs between
   * Conquered complex Syscall Emulation (SE) mode memory mapping by structuring the Python instantiation lifecycle to bypass gem5 "orphan" tree restrictions.
   * Wrote a custom C-level device driver inside the matrix multiplication workload to dispatch wakeup commands directly over the system memory bus to the custom silicon.
 
+* **Milestone 5: Cycle-Accurate State Machine and DMA Engine**
+  * Designed a cycle-accurate hardware state machine (FETCH, COMPUTE, STORE) triggered by gem5's `EventFunctionWrapper` to model the latency of memory fetches and matrix math operations.
+  * Implemented a functional `DMAPort` to act as a Bus Master, generating `ReadReq` memory packets and successfully receiving `ReadResp` payloads from DDR4 RAM across the simulated bus.
+  * Demonstrated a massive ~5x performance speedup by successfully offloading the compute workload, reducing execution time from 28 billion ticks on the host CPU down to 5.6 billion ticks on the NPU.
+
 ## Directory Structure
 
 * `configs/` - Python topology scripts for gem5 (`baseline.py`).
