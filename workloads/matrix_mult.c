@@ -21,6 +21,13 @@ void multiply() {
 }
 
 int main() {
+
+    // Pointer to our NPU's MMIO register
+    volatile int *npu_cmd_reg = (int *)0x80000000;
+
+    printf("Waking up the NPU via MMIO...\n");
+    *npu_cmd_reg = 0x01; // Send a "1" to the NPU over the bus!
+    
     // Initialize with dummy data
     for (int i=0; i<SIZE; i++) {
         for (int j=0; j<SIZE; j++) {

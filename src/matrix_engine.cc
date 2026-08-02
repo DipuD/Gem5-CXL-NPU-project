@@ -1,43 +1,53 @@
 #include "matrix_engine.hh"
+#include "mem/packet_access.hh"
 #include <iostream>
 
 namespace gem5
 {
 
-// NEW: Initialize memPort in the constructor list
-MatrixEngine::MatrixEngine(const MatrixEngineParams &p) : 
-    SimObject(p),
-    memPort(p.name + ".mem_side", this)
+MatrixEngine::MatrixEngine(const MatrixEngineParams &p)
+    : BasicPioDevice(p, p.pio_size)
 {
-    std::cout << "MatrixEngine Hardware: Powered On and Initialized!" << std::endl;
+    // Initialize the inherited base-class variables directly!
+    pioAddr = p.pio_addr;
+    pioSize = p.pio_size;
+
+    std::cout << "MatrixEngine Hardware: MMIO configured at physical address 0x" 
+              << std::hex << pioAddr << std::dec << "!" << std::endl;
 }
 
-void MatrixEngine::startup()
+AddrRangeList
+MatrixEngine::getAddrRanges() const
 {
-    std::cout << "MatrixEngine Hardware: Simulation Started!" << std::endl;
+    AddrRangeList ranges;
+    ranges.push_back(RangeSize(pioAddr, pioSize));
+    return ranges;
 }
 
-// NEW: Expose the port to the gem5 system
-Port &MatrixEngine::getPort(const std::string &if_name, PortID idx)
+Tick
+MatrixEngine::read(PacketPtr pkt)
 {
-    if (if_name == "mem_side") {
-        return memPort;
-    } else {
-        return SimObject::getPort(if_name, idx);
+    std::cout << "MatrixEngine: CPU read from MMIO address 0x" 
+              << std::hex << pkt->getAddr() << std::dec << std::endl;
+    
+    pkt->makeResponse();
+    memset(pkt->getPtr<uint8_t>(), 0, pkt->getSize());
+    return pioDelay;
+}
+
+Tick
+MatrixEngine::write(PacketPtr pkt)
+{
+    std::cout << "MatrixEngine: CPU wrote to MMIO address 0x" 
+              << std::hex << pkt->getAddr() << std::dec << std::endl;
+
+    if (pkt->getSize() == 4) {
+        uint32_t data = pkt->getLE<uint32_t>();
+        std::cout << "MatrixEngine: Received Command/Data: " << data << std::endl;
     }
-}
-
-// NEW: Handle incoming memory data (Dummy implementation for now)
-bool MatrixEngine::MemPort::recvTimingResp(PacketPtr pkt)
-{
-    // The RAM has sent us data!
-    return true; 
-}
-
-// NEW: Handle bus retry (Dummy implementation for now)
-void MatrixEngine::MemPort::recvReqRetry()
-{
-    // If the memory bus is busy, it tells us to try again later.
+    
+    pkt->makeResponse();
+    return pioDelay;
 }
 
 } // namespace gem5

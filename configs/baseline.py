@@ -39,17 +39,27 @@ board = SimpleBoard(
     cache_hierarchy=cache_hierarchy
 )
 
-# Attach the NPU to the board so the simulator knows it exists
-board.npu = npu 
+# Attach the NPU and connect the PIO (MMIO) port to the coherent crossbar
+board.npu = npu
+board.npu.pio = cache_hierarchy.membus.mem_side_ports
 
-board.npu.mem_side = cache_hierarchy.membus.cpu_side_ports
+# 5. Setup the Workload (Using the proper gem5 stdlib method!)
+binary = BinaryResource("/home/dipu3d/gem5-cxl-npu-project/workloads/mmult")
+board.set_se_binary_workload(binary)
 
-# 5. Set the Workload (Our compiled C program)
-binary_path = "/home/dipu3d/gem5-cxl-npu-project/workloads/mmult"
-board.set_se_binary_workload(BinaryResource(local_path=binary_path))
-
-# 6. Run the Simulation
-print("Running Baseline O3 Simulation...")
+# 6. Initialize Simulator
 simulator = Simulator(board=board)
+
+# 7. Force C++ Instantiation FIRST
+# This builds the entire Python hardware tree into C++ memory, resolving all orphans
+simulator._instantiate()
+
+# 8. Safely extract the Process and Map MMIO
+# NOW that the C++ process exists, we can safely call C++ translation functions on it
+process = board.get_processor().get_cores()[0].core.workload[0]
+process.map(0x80000000, 0x80000000, 0x1000, False)
+
+# 9. Run the Simulation
+print("Running Baseline O3 Simulation...")
 simulator.run()
 print(f"Simulation finished at tick {simulator.get_current_tick()}!")

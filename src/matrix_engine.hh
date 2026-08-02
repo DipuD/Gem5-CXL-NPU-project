@@ -1,39 +1,22 @@
 #ifndef __MATRIX_ENGINE_HH__
 #define __MATRIX_ENGINE_HH__
 
+#include "dev/io_device.hh"
 #include "params/MatrixEngine.hh"
-#include "sim/sim_object.hh"
-#include "mem/port.hh" // NEW: Required for hardware ports
 
 namespace gem5
 {
 
-class MatrixEngine : public SimObject
+class MatrixEngine : public BasicPioDevice
 {
-  private:
-    // NEW: Define our custom memory port
-    class MemPort : public RequestPort
-    {
-      private:
-        MatrixEngine *owner;
-      public:
-        MemPort(const std::string& name, MatrixEngine *owner) :
-            RequestPort(name, owner), owner(owner) {}
-      protected:
-        // Required overrides for any RequestPort
-        bool recvTimingResp(PacketPtr pkt) override;
-        void recvReqRetry() override;
-    };
-
-    // Instantiate the port as a physical part of the NPU
-    MemPort memPort;
-
   public:
     MatrixEngine(const MatrixEngineParams &p);
-    void startup() override;
-    
-    // NEW: Function that allows the Python script to plug wires into this port
-    Port &getPort(const std::string &if_name, PortID idx = InvalidPortID) override;
+
+    // Tell the memory bus our exact MMIO location
+    AddrRangeList getAddrRanges() const override;
+
+    Tick read(PacketPtr pkt) override;
+    Tick write(PacketPtr pkt) override;
 };
 
 } // namespace gem5
