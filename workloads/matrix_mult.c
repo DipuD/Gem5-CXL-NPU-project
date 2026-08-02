@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define SIZE 256 // Scaled up to blow out the 256KB L2 Cache!
+#define SIZE 256 
 
 // Global arrays placed in the .bss section.
-// This avoids complex glibc malloc() syscalls that can crash gem5 SE mode.
 static int A[SIZE][SIZE];
 static int B[SIZE][SIZE];
 static int C[SIZE][SIZE];
@@ -31,7 +30,7 @@ int main() {
 
     printf("CPU: Programming NPU Registers...\n");
     
-    // Write pointers (cast to 32-bit integers for the bus)
+    // Write pointers to the NPU's MMIO registers. We cast the addresses of our arrays to uint32_t.
     // Using your actual array names: A, B, and C
     *npu_addr_a = (uint32_t)(uintptr_t)A;
     *npu_addr_b = (uint32_t)(uintptr_t)B;
@@ -44,8 +43,7 @@ int main() {
     // CPU Busy-Wait Loop: Wait for the NPU to clear the command register to 0
     printf("CPU: Waiting for NPU to finish...\n");
     while (*npu_cmd != 0x00) {
-        // In a real system, the CPU would sleep or do context switching here.
-        // For this baseline, we will just spin.
+        // Optionally, you can add a small delay or yield here to avoid busy-waiting too aggressively
     }
 
     printf("CPU: NPU finished successfully!\n");

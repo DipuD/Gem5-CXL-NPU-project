@@ -27,8 +27,6 @@ processor = SimpleProcessor(
     num_cores=1,
     isa=ISA.X86
 )
-
-# 3.5 Setup our Custom Hardware
 npu = MatrixEngine(pio_addr=0x80000000)
 
 # 4. Setup the Board
@@ -38,8 +36,6 @@ board = SimpleBoard(
     memory=memory,
     cache_hierarchy=cache_hierarchy
 )
-
-# Attach the NPU and connect the PIO (MMIO) port to the coherent crossbar
 board.npu = npu
 board.npu.pio = cache_hierarchy.membus.mem_side_ports
 board.npu.dma = cache_hierarchy.membus.cpu_side_ports 
@@ -52,11 +48,9 @@ board.set_se_binary_workload(binary)
 simulator = Simulator(board=board)
 
 # 7. Force C++ Instantiation FIRST
-# This builds the entire Python hardware tree into C++ memory, resolving all orphans
 simulator._instantiate()
 
 # 8. Safely extract the Process and Map MMIO
-# NOW that the C++ process exists, we can safely call C++ translation functions on it
 process = board.get_processor().get_cores()[0].core.workload[0]
 process.map(0x80000000, 0x80000000, 0x1000, False)
 

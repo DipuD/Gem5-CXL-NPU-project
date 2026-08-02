@@ -11,13 +11,13 @@ namespace gem5
 class MatrixEngine : public BasicPioDevice
 {
   private:
-    // 1. Define the custom DMA Request Port (Warning Fixed!)
+    // 1. Define the custom DMA Request Port
     class DMAPort : public RequestPort {
       private:
         MatrixEngine *owner;
       public:
         DMAPort(const std::string& name, MatrixEngine *owner) :
-            RequestPort(name), owner(owner) {} // Removed 'owner' from RequestPort()
+            RequestPort(name), owner(owner) {} 
       protected:
         bool recvTimingResp(PacketPtr pkt) override {
             return owner->handleResponse(pkt);
@@ -51,4 +51,4 @@ class MatrixEngine : public BasicPioDevice
 
 } // namespace gem5
 
-#endif // __MATRIX_ENGINE_HH__
+#endif 

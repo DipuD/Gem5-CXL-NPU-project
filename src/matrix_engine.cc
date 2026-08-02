@@ -5,7 +5,6 @@
 namespace gem5
 {
 
-// Hardcode 0x1000 for the PioSize since it wasn't defined in the Python params
 MatrixEngine::MatrixEngine(const MatrixEngineParams &p)
     : BasicPioDevice(p, 0x1000),
       dmaPort(name() + ".dma", this),
@@ -42,7 +41,7 @@ bool
 MatrixEngine::handleResponse(PacketPtr pkt) 
 {
     std::cout << "NPU [DMA]: ReadResp received! Payload size: " << pkt->getSize() << " bytes." << std::endl;
-    delete pkt; // Cleanup to prevent memory leaks
+    delete pkt; 
     return true;
 }
 
@@ -130,4 +129,4 @@ MatrixEngine::write(PacketPtr pkt)
     return pioDelay;
 }
 
-} // namespace gem5
+} 
